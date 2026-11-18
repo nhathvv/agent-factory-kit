@@ -1,0 +1,24 @@
+# Project configuration for Codex
+# Based on official Codex docs; Oskar Groth's own setup ran on Claude Code.
+# Note: Codex loads project-level configuration only when the project is trusted.
+
+# Model configuration: Use the strongest model your account offers (verify in your version)
+# model = "..."
+
+# Approval policy: on-request for interactive work, never for non-interactive codex exec
+approval_policy = "on-request"
+
+# Sandbox policy for filesystem safety
+sandbox_mode = "workspace-write"
+
+[agents]
+# Enable multi-agent tools (default is true)
+enabled = true
+
+# Default model for spawned subagents (use strongest model your account offers, or inherit)
+# default_subagent_model = "..."
+
+# Max concurrent subagent threads per session (example value, adjust as needed; verify in your version)
+# max_concurrent_threads_per_session = 4
+
+

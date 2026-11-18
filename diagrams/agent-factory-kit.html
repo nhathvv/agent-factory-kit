@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Factory Kit</title>
+<style>
+:root{--bg:#f1f5f9;--ink:#1e293b;--muted:#475569;--font:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+--role-client:#dbeafe;--ink-client:#2563eb;--on-client:#1e40af;--role-service:#ffedd5;--ink-service:#ea580c;--on-service:#9a3412;
+--role-data:#dcfce7;--ink-data:#16a34a;--on-data:#166534;--role-async:#f3e8ff;--ink-async:#9333ea;--on-async:#6b21a8;
+--role-error:#fee2e2;--ink-error:#dc2626;--on-error:#991b1b;--role-infra:#f1f5f9;--ink-infra:#475569;--on-infra:#1e293b;
+--edge-ink:#475569;--edge-service:#ea580c;--edge-data:#16a34a;--packet-bg:#14b8a6;--fit:calc(min(100vw,177.7778vh)/1640px)}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);font-family:var(--font);color:var(--ink)}
+.frame{width:1640px;height:930px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(min(var(--fit),1.4))}
+h1{margin:0;padding:20px 40px 0;font-size:26px;font-weight:700;letter-spacing:-.012em}
+h1 span{font-weight:500;color:var(--muted);font-size:18px;margin-left:12px}
+.stage{position:absolute;left:0;top:70px;width:1640px;height:860px;overflow:hidden;margin:0}
+.scene{position:absolute;left:0;top:0;width:1640px;height:730px;overflow:hidden}
+.camera{position:absolute;left:0;top:0;width:1640px;height:720px;transform-origin:0 0;animation:camera 54.0s ease-in-out infinite;
+ background-image:radial-gradient(#4755691a 1px,transparent 1px);background-size:20px 20px}
+.edges{position:absolute;inset:0;z-index:1;pointer-events:none}
+.edge{fill:none;stroke:var(--edge-ink);stroke-width:2px}
+.edge--back{stroke:var(--edge-service);stroke-dasharray:7 6}
+.edge--pull{stroke:var(--edge-data)}
+.edge--soft{stroke:#47556a6b;stroke-dasharray:3 5}
+.st{position:absolute;z-index:2;box-sizing:border-box;padding:10px 14px;border-radius:10px;background:var(--fill);border:1.5px solid var(--line);color:var(--on);box-shadow:0 1px 2px rgba(30,41,59,.06),0 6px 16px -12px rgba(30,41,59,.3);display:flex;flex-direction:column;justify-content:center}
+.st[data-role=client]{--fill:var(--role-client);--line:var(--ink-client);--on:var(--on-client)}
+.st[data-role=service]{--fill:var(--role-service);--line:var(--ink-service);--on:var(--on-service)}
+.st[data-role=data]{--fill:var(--role-data);--line:var(--ink-data);--on:var(--on-data)}
+.st[data-role=async]{--fill:var(--role-async);--line:var(--ink-async);--on:var(--on-async)}
+.st[data-role=error]{--fill:var(--role-error);--line:var(--ink-error);--on:var(--on-error)}
+.st[data-role=infra]{--fill:var(--role-infra);--line:var(--ink-infra);--on:var(--on-infra)}
+.tag{position:absolute;top:-10px;left:12px;font:600 12px var(--mono);padding:1px 8px;border-radius:999px;background:var(--line);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+.t{margin:0;font-size:20px;font-weight:650;letter-spacing:-.012em}
+.s{margin:4px 0 0;font-size:15px;line-height:1.3;color:var(--on);opacity:.9}
+.st[data-node-id=research] .t,.st[data-node-id=impl] .t,.st[data-node-id=review] .t{font-family:var(--mono);font-size:18px}
+.el{position:absolute;z-index:3;transform:translate(-50%,-50%);font:600 15px var(--font);color:var(--ink);background:#f1f5f9;padding:1px 6px;border-radius:6px;white-space:nowrap}
+.pk{position:absolute;left:0;top:0;z-index:4}
+.pk b{display:block;position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 25%,transparent);opacity:0}
+.ring{position:absolute;z-index:5;box-sizing:border-box;border:3px solid #0f172a;border-radius:16px;opacity:0;pointer-events:none}
+.chips{position:absolute;left:14px;bottom:8px;z-index:5;white-space:nowrap;display:flex;gap:4px}
+.chip{white-space:nowrap;font:600 12px var(--mono);padding:2px 6px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--line)}
+.legend{position:absolute;left:40px;top:694px;z-index:3;display:flex;gap:26px;font-size:15px;color:var(--muted)}
+.legend i{display:inline-block;width:34px;border-top:2px solid var(--edge-ink);vertical-align:middle;margin-right:8px}
+.legend .b i{border-top:2px dashed var(--edge-service)}.legend .p i{border-top-color:var(--edge-data)}.legend .n{color:var(--ink);font-weight:600}
+.caps{position:absolute;left:0;top:730px;width:1640px;height:130px;z-index:10;pointer-events:none}
+.cap{position:absolute;left:40px;right:40px;top:14px;bottom:18px;box-sizing:border-box;display:flex;align-items:center;gap:18px;padding:0 26px;background:#0f172a;color:#f8fafc;border-radius:14px;font:500 27px/1.35 var(--font);clip-path:inset(0 100% 0 0 round 14px)}
+.cn{font:600 15px var(--mono);color:#94a3b8;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes camera{0.000%{transform:translate(0.0px,0.0px) scale(1.000)}11.111%{transform:translate(0.0px,0.0px) scale(1.000)}12.407%{transform:translate(250.0px,-175.0px) scale(2.000)}22.222%{transform:translate(250.0px,-175.0px) scale(2.000)}23.519%{transform:translate(356.9px,32.7px) scale(1.090)}33.333%{transform:translate(356.9px,32.7px) scale(1.090)}34.630%{transform:translate(-167.6px,51.5px) scale(1.718)}44.444%{transform:translate(-167.6px,51.5px) scale(1.718)}45.741%{transform:translate(-509.4px,-222.8px) scale(1.537)}55.556%{transform:translate(-509.4px,-222.8px) scale(1.537)}56.852%{transform:translate(-1659.5px,-162.1px) scale(1.952)}66.667%{transform:translate(-1659.5px,-162.1px) scale(1.952)}67.963%{transform:translate(-1207.0px,-205.5px) scale(1.417)}77.778%{transform:translate(-1207.0px,-205.5px) scale(1.417)}79.074%{transform:translate(28.8px,-21.0px) scale(0.959)}88.889%{transform:translate(28.8px,-21.0px) scale(0.959)}90.185%{transform:translate(0.0px,0.0px) scale(1.000)}100.000%{transform:translate(0.0px,0.0px) scale(1.000)}}
+@keyframes pk-e-mandate{0%,13.333%{offset-distance:0%;opacity:0}13.889%{opacity:1}20.741%{opacity:1}21.296%,100%{offset-distance:100%;opacity:0}}
+.pk-e-mandate{offset-path:path("M230 270 H320");animation:pk-e-mandate 54.0s linear infinite}
+@keyframes pk-e-assign{0%,35.556%{offset-distance:0%;opacity:0}36.111%{opacity:1}42.963%{opacity:1}43.519%,100%{offset-distance:100%;opacity:0}}
+.pk-e-assign{offset-path:path("M530 270 H620");animation:pk-e-assign 54.0s linear infinite}
+@keyframes pk-e-pr{0%,46.667%{offset-distance:0%;opacity:0}47.222%{opacity:1}50.093%{opacity:1}50.648%,100%{offset-distance:100%;opacity:0}}
+.pk-e-pr{offset-path:path("M830 270 H920");animation:pk-e-pr 54.0s linear infinite}
+@keyframes pk-e-ready{0%,57.778%{offset-distance:0%;opacity:0}58.333%{opacity:1}61.204%{opacity:1}61.759%,100%{offset-distance:100%;opacity:0}}
+.pk-e-ready{offset-path:path("M1090 270 H1170");animation:pk-e-ready 54.0s linear infinite}
+@keyframes pk-e-merge{0%,61.759%{offset-distance:0%;opacity:0}62.315%{opacity:1}65.185%{opacity:1}65.741%,100%{offset-distance:100%;opacity:0}}
+.pk-e-merge{offset-path:path("M1360 270 H1490");animation:pk-e-merge 54.0s linear infinite}
+@keyframes pk-e-ask{0%,68.889%{offset-distance:0%;opacity:0}69.444%{opacity:1}76.296%{opacity:1}76.852%,100%{offset-distance:100%;opacity:0}}
+.pk-e-ask{offset-path:path("M1555 325 V440");animation:pk-e-ask 54.0s linear infinite}
+@keyframes pk-e-done{0%,80.000%{offset-distance:0%;opacity:0}80.556%{opacity:1}87.407%{opacity:1}87.963%,100%{offset-distance:100%;opacity:0}}
+.pk-e-done{offset-path:path("M1425 590 V650 H135 V325");animation:pk-e-done 54.0s linear infinite}
+@keyframes pk-e-review{0%,50.648%{offset-distance:0%;opacity:0}51.204%{opacity:1}54.074%{opacity:1}54.630%,100%{offset-distance:100%;opacity:0}}
+.pk-e-review{offset-path:path("M1005 325 V440");animation:pk-e-review 54.0s linear infinite}
+@keyframes pk-e-find{0%,50.648%{offset-distance:0%;opacity:0}51.204%{opacity:1}54.074%{opacity:1}54.630%,100%{offset-distance:100%;opacity:0}}
+.pk-e-find{offset-path:path("M920 495 H725 V325");animation:pk-e-find 54.0s linear infinite}
+.ch-moving{--line:#22c55e;animation:ch-moving 54.0s step-end infinite}
+@keyframes ch-moving{0%{background:#22c55e;color:#fff}66.67%{background:transparent;color:var(--line)}}
+.ch-needsyou{--line:#ef4444;animation:ch-needsyou 54.0s step-end infinite}
+@keyframes ch-needsyou{0%{background:transparent;color:var(--line)}66.67%{background:#ef4444;color:#fff}83.33%{background:transparent;color:var(--line)}}
+.ch-done{--line:#14b8a6;animation:ch-done 54.0s step-end infinite}
+@keyframes ch-done{0%{background:transparent;color:var(--line)}83.33%{background:#14b8a6;color:#fff}100.00%{background:transparent;color:var(--line)}100%{background:#14b8a6;color:#fff}}
+.cap-b0{animation:cap-b0 54.0s linear infinite}
+@keyframes cap-b0{0%,1.481%{clip-path:inset(0 100% 0 0 round 14px)}2.315%,9.722%{clip-path:inset(0 0 0 0 round 14px)}10.556%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b1{animation:cap-b1 54.0s linear infinite}
+@keyframes cap-b1{0%,12.593%{clip-path:inset(0 100% 0 0 round 14px)}13.426%,20.833%{clip-path:inset(0 0 0 0 round 14px)}21.667%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b2{animation:cap-b2 54.0s linear infinite}
+@keyframes cap-b2{0%,23.704%{clip-path:inset(0 100% 0 0 round 14px)}24.537%,31.944%{clip-path:inset(0 0 0 0 round 14px)}32.778%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b3{animation:cap-b3 54.0s linear infinite}
+@keyframes cap-b3{0%,34.815%{clip-path:inset(0 100% 0 0 round 14px)}35.648%,43.056%{clip-path:inset(0 0 0 0 round 14px)}43.889%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b4{animation:cap-b4 54.0s linear infinite}
+@keyframes cap-b4{0%,45.926%{clip-path:inset(0 100% 0 0 round 14px)}46.759%,54.167%{clip-path:inset(0 0 0 0 round 14px)}55.000%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b5{animation:cap-b5 54.0s linear infinite}
+@keyframes cap-b5{0%,57.037%{clip-path:inset(0 100% 0 0 round 14px)}57.870%,65.278%{clip-path:inset(0 0 0 0 round 14px)}66.111%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b6{animation:cap-b6 54.0s linear infinite}
+@keyframes cap-b6{0%,68.148%{clip-path:inset(0 100% 0 0 round 14px)}68.981%,76.389%{clip-path:inset(0 0 0 0 round 14px)}77.222%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b7{animation:cap-b7 54.0s linear infinite}
+@keyframes cap-b7{0%,79.259%{clip-path:inset(0 100% 0 0 round 14px)}80.093%,87.500%{clip-path:inset(0 0 0 0 round 14px)}88.333%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.cap-b8{animation:cap-b8 54.0s linear infinite}
+@keyframes cap-b8{0%,90.370%{clip-path:inset(0 100% 0 0 round 14px)}91.204%,98.611%{clip-path:inset(0 0 0 0 round 14px)}99.444%,100%{clip-path:inset(0 0 0 100% round 14px)}}
+.r1-orch{animation:r1-orch 54.0s linear infinite}
+@keyframes r1-orch{0%,12.778%{opacity:0}13.333%,21.111%{opacity:1}21.667%,100%{opacity:0}}
+.r2-research{animation:r2-research 54.0s linear infinite}
+@keyframes r2-research{0%,23.889%{opacity:0}24.444%,32.222%{opacity:1}32.778%,100%{opacity:0}}
+.r2-issue{animation:r2-issue 54.0s linear infinite}
+@keyframes r2-issue{0%,23.889%{opacity:0}24.444%,32.222%{opacity:1}32.778%,100%{opacity:0}}
+.r3-owner{animation:r3-owner 54.0s linear infinite}
+@keyframes r3-owner{0%,35.000%{opacity:0}35.556%,43.333%{opacity:1}43.889%,100%{opacity:0}}
+.r3-impl{animation:r3-impl 54.0s linear infinite}
+@keyframes r3-impl{0%,35.000%{opacity:0}35.556%,43.333%{opacity:1}43.889%,100%{opacity:0}}
+.r4-pr{animation:r4-pr 54.0s linear infinite}
+@keyframes r4-pr{0%,46.111%{opacity:0}46.667%,54.444%{opacity:1}55.000%,100%{opacity:0}}
+.r4-review{animation:r4-review 54.0s linear infinite}
+@keyframes r4-review{0%,46.111%{opacity:0}46.667%,54.444%{opacity:1}55.000%,100%{opacity:0}}
+.r5-clear{animation:r5-clear 54.0s linear infinite}
+@keyframes r5-clear{0%,57.222%{opacity:0}57.778%,65.556%{opacity:1}66.111%,100%{opacity:0}}
+.r6-gate{animation:r6-gate 54.0s linear infinite}
+@keyframes r6-gate{0%,68.333%{opacity:0}68.889%,76.667%{opacity:1}77.222%,100%{opacity:0}}
+.r7-human{animation:r7-human 54.0s linear infinite}
+@keyframes r7-human{0%,79.444%{opacity:0}80.000%,87.778%{opacity:1}88.333%,100%{opacity:0}}
+
+@media (prefers-reduced-motion:reduce){.camera{animation:none;transform:none}.pk,.caps,.ring{display:none}.chip{animation:none!important;background:var(--line)!important;color:#fff!important}}
+</style></head><body>
+<div class="frame">
+<h1>Agent Factory Kit <span>1 outcome đi từ mandate đến done</span></h1>
+<figure class="stage" role="img" aria-label="Luồng một outcome trong Agent Factory Kit, kể theo 9 bước.">
+<span class="sr">Một outcome đi từ mandate đến done: Orchestrator điều phối, Owner làm, reviewer độc lập, Human giữ các cổng. Human giao mandate cho Orchestrator. Một lần đồng ý phủ cả kế hoạch đã duyệt. Orchestrator không viết product code: nó điều tra, mở một issue cho mỗi outcome, rồi giao việc. Owner làm trọn outcome trong worktree và branch riêng; implementer chỉ nhận một task có phạm vi. Mỗi PR do một agent không viết code review. Finding phải được sửa hoặc phản bác với bằng chứng. Orchestrator chỉ clear đúng một commit SHA: kiểm phạm vi, thứ tự, xung đột. Không review lại code. Release, deploy, migration, credentials: thực thi luôn cần Human nói rõ một chữ yes. Chỉ khi được kiểm chứng mới là done. Mỗi báo cáo kết thúc bằng Needs you: hành động hoặc nothing. Toàn cảnh: mọi vòng chạy theo cùng một luật, và quyền quyết định cuối vẫn thuộc Human.</span>
+<div class="scene"><div class="camera">
+<svg class="edges" viewBox="0 0 1640 720" width="1640" height="720" aria-hidden="true">
+<defs>
+<marker id="a-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+<marker id="a-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ea580c"/></marker>
+<marker id="a-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#16a34a"/></marker>
+</defs>
+<path class="edge" id="e-mandate" d="M230 270 H320" marker-end="url(#a-f)"/>
+<path class="edge" id="e-assign" d="M530 270 H620" marker-end="url(#a-f)"/>
+<path class="edge" id="e-pr" d="M830 270 H920" marker-end="url(#a-f)"/>
+<path class="edge" id="e-ready" d="M1090 270 H1170" marker-end="url(#a-f)"/>
+<path class="edge" id="e-merge" d="M1360 270 H1490" marker-end="url(#a-f)"/>
+<path class="edge" id="e-ask" d="M1555 325 V440" marker-end="url(#a-f)"/>
+<path class="edge edge--back" id="e-done" d="M1425 590 V650 H135 V325" marker-end="url(#a-b)"/>
+<path class="edge" id="e-review" d="M1005 325 V440" marker-end="url(#a-f)"/>
+<path class="edge edge--back" id="e-find" d="M920 495 H725 V325" marker-end="url(#a-b)"/>
+<path class="edge" id="e-task" d="M690 215 V130" marker-end="url(#a-f)"/>
+<path class="edge edge--back" id="e-diff" d="M760 130 V215" marker-end="url(#a-b)"/>
+<path class="edge edge--pull" id="e-read" d="M425 130 V215" marker-end="url(#a-p)"/>
+<path class="edge edge--soft" id="e-tie" d="M425 325 V440" />
+</svg>
+<div class="st" data-node-id="human" data-role="client" style="left:40px;top:215px;width:190px;height:110px"><span class="tag">role</span><p class="t">Human</p><p class="s">decides · always asked first</p></div>
+<div class="st" data-node-id="orch" data-role="service" style="left:320px;top:215px;width:210px;height:110px"><span class="tag">role</span><p class="t">Orchestrator</p><p class="s">1 per lane · never writes product code</p></div>
+<div class="st" data-node-id="owner" data-role="service" style="left:620px;top:215px;width:210px;height:110px"><span class="tag">role</span><p class="t">Owner</p><p class="s">own worktree + branch</p></div>
+<div class="st" data-node-id="pr" data-role="data" style="left:920px;top:215px;width:170px;height:110px"><span class="tag">work</span><p class="t">Pull request</p><p class="s">diff + commit SHA</p></div>
+<div class="st" data-node-id="clear" data-role="infra" style="left:1170px;top:215px;width:190px;height:110px"><span class="tag">gate</span><p class="t">Merge clearance</p><p class="s">orchestrator · 1 exact SHA</p></div>
+<div class="st" data-node-id="main" data-role="data" style="left:1490px;top:215px;width:130px;height:110px"><span class="tag">work</span><p class="t">main</p><p class="s">never pushed directly</p></div>
+<div class="st" data-node-id="research" data-role="async" style="left:320px;top:40px;width:210px;height:90px"><span class="tag">helper</span><p class="t">researcher</p><p class="s">read-only · no Edit/Write</p></div>
+<div class="st" data-node-id="impl" data-role="async" style="left:620px;top:40px;width:210px;height:90px"><span class="tag">helper</span><p class="t">implementer</p><p class="s">1 scoped task per call</p></div>
+<div class="st" data-node-id="issue" data-role="data" style="left:320px;top:440px;width:210px;height:130px"><span class="tag">record</span><p class="t">GitHub issue</p><p class="s">1 per outcome</p><span class="chips"><span class="chip ch-moving" data-window="0.0,66.7">moving</span><span class="chip ch-needsyou" data-window="66.7,83.3">needs you</span><span class="chip ch-done" data-window="83.3,100.0">done</span></span></div>
+<div class="st" data-node-id="review" data-role="async" style="left:920px;top:440px;width:190px;height:110px"><span class="tag">helper</span><p class="t">code-reviewer</p><p class="s">did not write the code</p></div>
+<div class="st" data-node-id="gate" data-role="error" style="left:1240px;top:440px;width:370px;height:150px"><span class="tag">human gate</span><p class="t">Explicit human yes</p><p class="s">Money · Customers · Production · Credentials · Irreversible · Direction · Rules</p></div>
+<span class="el" style="left:275px;top:238px">mandate</span>
+<span class="el" style="left:575px;top:238px">outcome</span>
+<span class="el" style="left:875px;top:238px">PR</span>
+<span class="el" style="left:1130px;top:198px">PR + SHA</span>
+<span class="el" style="left:1425px;top:238px">[SHA] cleared</span>
+<span class="el" style="left:1448px;top:385px">release / deploy / migrate</span>
+<span class="el" style="left:780px;top:672px">explicit yes · verified · done</span>
+<span class="el" style="left:822px;top:520px">findings · fix or refute</span>
+<span class="el" style="left:640px;top:175px">scoped task</span>
+<span class="el" style="left:812px;top:175px">diff + tests</span>
+<span class="el" style="left:470px;top:175px">findings</span>
+<i class="pk" style="--c:var(--packet-bg)" data-window="13.3,21.3"><b class="pk-e-mandate"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="35.6,43.5"><b class="pk-e-assign"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="46.7,50.6"><b class="pk-e-pr"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="57.8,61.8"><b class="pk-e-ready"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="61.8,65.7"><b class="pk-e-merge"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="68.9,76.9"><b class="pk-e-ask"></b></i>
+<i class="pk" style="--c:var(--edge-service)" data-window="80.0,88.0"><b class="pk-e-done"></b></i>
+<i class="pk" style="--c:var(--packet-bg)" data-window="50.6,54.6"><b class="pk-e-review"></b></i>
+<i class="pk" style="--c:var(--edge-service)" data-window="50.6,54.6"><b class="pk-e-find"></b></i>
+<div class="ring r1-orch" data-window="12.8,21.7" style="left:312px;top:207px;width:226px;height:126px"></div>
+<div class="ring r2-research" data-window="23.9,32.8" style="left:312px;top:32px;width:226px;height:106px"></div>
+<div class="ring r2-issue" data-window="23.9,32.8" style="left:312px;top:432px;width:226px;height:146px"></div>
+<div class="ring r3-owner" data-window="35.0,43.9" style="left:612px;top:207px;width:226px;height:126px"></div>
+<div class="ring r3-impl" data-window="35.0,43.9" style="left:612px;top:32px;width:226px;height:106px"></div>
+<div class="ring r4-pr" data-window="46.1,55.0" style="left:912px;top:207px;width:186px;height:126px"></div>
+<div class="ring r4-review" data-window="46.1,55.0" style="left:912px;top:432px;width:206px;height:126px"></div>
+<div class="ring r5-clear" data-window="57.2,66.1" style="left:1162px;top:207px;width:206px;height:126px"></div>
+<div class="ring r6-gate" data-window="68.3,77.2" style="left:1232px;top:432px;width:386px;height:166px"></div>
+<div class="ring r7-human" data-window="79.4,88.3" style="left:32px;top:207px;width:206px;height:126px"></div>
+
+<div class="legend"><span><i></i>forward handoff</span><span class="b"><i></i>return / loop</span><span class="p"><i></i>read from</span><span class="n">Cuối mỗi báo cáo: Needs you: &lt;action&gt; | nothing</span></div>
+</div></div>
+<div class="caps"><div class="cap cap-b0" data-window="1.5,10.6"><span class="cn">1/9</span>Một outcome đi từ mandate đến done: Orchestrator điều phối, Owner làm, reviewer độc lập, Human giữ các cổng.</div>
+<div class="cap cap-b1" data-window="12.6,21.7"><span class="cn">2/9</span>Human giao mandate cho Orchestrator. Một lần đồng ý phủ cả kế hoạch đã duyệt.</div>
+<div class="cap cap-b2" data-window="23.7,32.8"><span class="cn">3/9</span>Orchestrator không viết product code: nó điều tra, mở một issue cho mỗi outcome, rồi giao việc.</div>
+<div class="cap cap-b3" data-window="34.8,43.9"><span class="cn">4/9</span>Owner làm trọn outcome trong worktree và branch riêng; implementer chỉ nhận một task có phạm vi.</div>
+<div class="cap cap-b4" data-window="45.9,55.0"><span class="cn">5/9</span>Mỗi PR do một agent không viết code review. Finding phải được sửa hoặc phản bác với bằng chứng.</div>
+<div class="cap cap-b5" data-window="57.0,66.1"><span class="cn">6/9</span>Orchestrator chỉ clear đúng một commit SHA: kiểm phạm vi, thứ tự, xung đột. Không review lại code.</div>
+<div class="cap cap-b6" data-window="68.1,77.2"><span class="cn">7/9</span>Release, deploy, migration, credentials: thực thi luôn cần Human nói rõ một chữ yes.</div>
+<div class="cap cap-b7" data-window="79.3,88.3"><span class="cn">8/9</span>Chỉ khi được kiểm chứng mới là done. Mỗi báo cáo kết thúc bằng Needs you: hành động hoặc nothing.</div>
+<div class="cap cap-b8" data-window="90.4,99.4"><span class="cn">9/9</span>Toàn cảnh: mọi vòng chạy theo cùng một luật, và quyền quyết định cuối vẫn thuộc Human.</div>
+</div>
+</figure>
+</div>
+</body></html>
