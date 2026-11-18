@@ -1,5 +1,7 @@
 # Solo Software Factory Setup Kit
 
+🇻🇳 [Tiếng Việt](README_VI.md)
+
 *Adapted from Oskar Groth's [orchestrating-agents](https://github.com/OskarGroth/orchestrating-agents) kit (MIT License).*
 
 ---
@@ -26,7 +28,8 @@ The primary operator of these files is your primary **AI agent session** acting 
 - `AGENTS.md`: Shared instruction chain for both Claude Code and Codex, detailing orchestrator behavior, owner sessions, and tool-specific mechanics.
 - `SOURCES.md`: Audit trail linking every rule, flag, and configuration key to its upstream documentation.
 - `.claude/agents/`: Example subagent definitions for Claude Code (`code-reviewer.md`, `implementer.md`, `researcher.md`).
-- `diagrams/agent-factory-kit.html`: Animated system diagram of the kit.
+- `README_VI.md`: Vietnamese version of this file.
+- `diagrams/agent-factory-kit.html`: Animated system diagram of the kit (`.gif` is the README preview).
 - `.codex/`: Configuration and subagent definitions for Codex (`config.toml`, `agents/code-reviewer.toml`, `agents/implementer.toml`).
 
 ---
@@ -35,7 +38,7 @@ The primary operator of these files is your primary **AI agent session** acting 
 
 Interactive system diagram of the factory (orchestrator, owners, helper subagents, review and merge flow):
 
-![Agent Factory Kit diagram](diagrams/agent-factory-kit.png)
+![Agent Factory Kit diagram](diagrams/agent-factory-kit.gif)
 
 - [Open the animated diagram source](diagrams/agent-factory-kit.html)
 - [**View it live in the browser**](https://htmlpreview.github.io/?https://github.com/nhathvv/agent-factory-kit/blob/main/diagrams/agent-factory-kit.html)
