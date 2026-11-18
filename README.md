@@ -35,7 +35,9 @@ The primary operator of these files is your primary **AI agent session** acting 
 
 Interactive system diagram of the factory (orchestrator, owners, helper subagents, review and merge flow):
 
-- [Open the diagram source](diagrams/agent-factory-kit.html)
+![Agent Factory Kit diagram](diagrams/agent-factory-kit.png)
+
+- [Open the animated diagram source](diagrams/agent-factory-kit.html)
 - [**View it live in the browser**](https://htmlpreview.github.io/?https://github.com/nhathvv/agent-factory-kit/blob/main/diagrams/agent-factory-kit.html)
 
 ---
